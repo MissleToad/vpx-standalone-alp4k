@@ -1,6 +1,6 @@
 # It Pinball Madness (Original 2022)
 
-![Table Preview](../../images/cUrUo1Y7dL-preview.webp)
+![Table Preview](../../cUrUo1Y7dL-preview.webp)
 
 <br>
 

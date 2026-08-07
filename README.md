@@ -539,6 +539,7 @@ Links to these products on Amazon are through affiliate links.
 | [Inhabiting Mars (Original 2023)](external/vpx-inhabitinmars) | :white_check_mark: | :white_check_mark: | :x: | :x: | 43 |
 | [Iron Maiden (Stern 1981)](external/vpx-ironmaiden) | :white_check_mark: | :x: | :white_check_mark: | :x: | 60 |
 | [Iron Man 2, JP's (Original 2018)](external/vpx-jpironman2) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | 60 |
+| [It Pinball Madness (Original 2022)](external/vpx-itpinballmadness) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | 60 |
 | [Jack In The Box (Gottlieb 1973)](external/vpx-jackinthebox) | :white_check_mark: | :x: | :x: | :x: | 46 |
 | [Jack Sparrow (Original 2023)](external/vpx-jacksparrow) | :white_check_mark: | :white_check_mark: | :x: | :x: | 55 |
 | [Jack·Bot (Williams 1995)](external/vpx-jackbot) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | 35 |
