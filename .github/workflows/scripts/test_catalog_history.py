@@ -31,36 +31,22 @@ class HistoryTests(unittest.TestCase):
                          ['manifest.json', 'table-history.json'])
 
     @patch('catalog_history.table_renames', return_value={})
-    @patch('catalog_history.source_history')
-    def test_fork_bootstraps_upstream_instead_of_old_test_releases(self, source, renames):
-        current = published_release('v2', D2)
-        old_test = published_release('test', D1)
-        repo = repository(current, old_test)
-        repo.fork = True
-        repo.source = SimpleNamespace(full_name='upstream/catalog')
-        seed = advance(None, {'a': {'configVersion': 'a'}}, 'v1', D1)
-        source.return_value = (seed, 'refs/catalog-history/source/v1')
-        h = release_history(repo, current, {'a': {'configVersion': 'a'}})
-        self.assertEqual(h['tables']['a']['firstAvailableAt'], D1)
-        self.assertEqual(h['tables']['a']['updatedAt'], D1)
-        source.assert_called_once_with(repo.source, current.published_at)
-        renames.assert_called_once_with('v1', 'v2', previous_ref='refs/catalog-history/source/v1')
-
-    @patch('catalog_history.source_history')
-    @patch('catalog_history.table_renames', return_value={})
     @patch('catalog_history.download_json')
-    def test_fork_resumes_its_own_ledger_after_first_release(self, download, renames, source):
-        old = published_release('v1', D1, 'table-history.json')
-        current = published_release('v2', D2)
-        repo = repository(current, old)
-        repo.fork = True
-        repo.source = SimpleNamespace(full_name='upstream/catalog')
-        seed = advance(None, {'a': {'configVersion': 'a'}}, 'v1', D1)
-        download.return_value = seed
+    def test_fork_uses_its_own_first_release_and_never_reads_upstream(self, download, renames):
+        class ForkRepository(SimpleNamespace):
+            fork = True
+            @property
+            def source(self):
+                raise AssertionError('Must not read upstream history')
+        old = published_release('fork-v1', D2, 'manifest.json')
+        current = published_release('fork-v2', D3)
+        repo = ForkRepository(full_name='fork/catalog', get_releases=lambda: [current, old])
+        download.return_value = {'a': {'configVersion': 'a'}}
         h = release_history(repo, current, {'a': {'configVersion': 'b'}})
-        self.assertEqual(h['tables']['a']['firstAvailableAt'], D1)
-        self.assertEqual(h['tables']['a']['updatedAt'], D2)
-        source.assert_not_called()
+        self.assertEqual(h['tables']['a']['firstAvailableAt'], D2)
+        self.assertEqual(h['tables']['a']['firstAvailableRelease'], 'fork-v1')
+        self.assertEqual(h['tables']['a']['updatedAt'], D3)
+        download.assert_called_once_with('fork-v1/manifest.json')
 
     @patch('catalog_history.table_renames', return_value={})
     @patch('catalog_history.download_json')
@@ -111,10 +97,23 @@ class HistoryTests(unittest.TestCase):
                          advance(None, tables, 'v1', D1))
         download.assert_not_called()
 
-    def test_missing_historical_manifest_fails_instead_of_resetting_arrivals(self):
-        old = published_release('v1', D1)
+    @patch('catalog_history.table_renames', return_value={})
+    @patch('catalog_history.download_json')
+    def test_non_catalog_releases_are_skipped(self, download, renames):
+        experiment = published_release('experiment', D1)
+        old = published_release('v1', D2, 'manifest.json')
+        current = published_release('v2', D3)
+        tables = {'a': {'configVersion': 'a'}}
+        download.return_value = tables
+        h = release_history(repository(current, old, experiment), current, tables)
+        self.assertEqual(h['tables']['a']['firstAvailableAt'], D2)
+        download.assert_called_once_with('v1/manifest.json')
+
+    @patch('catalog_history.download_json', side_effect=OSError('download failed'))
+    def test_existing_manifest_download_failure_is_not_silently_skipped(self, download):
+        old = published_release('v1', D1, 'manifest.json')
         current = published_release('v2', D2)
-        with self.assertRaisesRegex(ValueError, 'v1 has no manifest'):
+        with self.assertRaisesRegex(OSError, 'download failed'):
             release_history(repository(current, old), current, {'a': {}})
 
     @patch('catalog_history.download_json')
@@ -171,10 +170,6 @@ class HistoryTests(unittest.TestCase):
             git('commit', '-m', 'rename')
             git('tag', 'v2')
             self.assertEqual(table_renames('v1', 'v2', tmp), {'vpx-new':'vpx-old'})
-            git('update-ref', 'refs/catalog-history/source/v2', 'v1')
-            # Upstream v2 is a different commit than this fork's v2.
-            self.assertEqual(table_renames('v2', 'v2', tmp,
-                previous_ref='refs/catalog-history/source/v2'), {'vpx-new':'vpx-old'})
 
     def test_refuses_old_release_against_new_ledger(self):
         h = advance(None,{'a':{}},'v2',D2)

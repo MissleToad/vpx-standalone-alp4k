@@ -29,13 +29,13 @@ def fingerprint(entry):
 def utc(value):
     return datetime.fromisoformat(value.replace('Z', '+00:00')).astimezone(timezone.utc)
 
-def table_renames(previous, current, cwd='.', ref_prefix='refs/tags/', previous_ref=None):
-    if not previous or (previous == current and previous_ref is None):
+def table_renames(previous, current, cwd='.'):
+    if not previous or previous == current:
         return {}
     # The release runner is blobless: restrict rename detection to YAML so
     # it never fetches old launcher artwork or other large binary blobs.
     result = subprocess.run(['git', 'diff', '--name-status', '-M',
-                             previous_ref or f'{ref_prefix}{previous}', f'{ref_prefix}{current}', '--', 'external/*/table.yml'],
+                             f'refs/tags/{previous}', f'refs/tags/{current}', '--', 'external/*/table.yml'],
                             cwd=cwd, text=True, capture_output=True, check=True)
     aliases = {}
     for line in result.stdout.splitlines():
@@ -84,7 +84,7 @@ def download_json(url):
     with urlopen(url, timeout=60) as response:
         return json.load(response)
 
-def backfill(repo, releases=None, cwd='.', history=None, ref_prefix='refs/tags/'):
+def backfill(repo, releases=None, cwd='.', history=None):
     if releases is None:
         # gh handles the developer's existing auth; no credential is printed or
         # persisted in the ledger. This operation is read-only.
@@ -96,13 +96,14 @@ def backfill(repo, releases=None, cwd='.', history=None, ref_prefix='refs/tags/'
     for release in releases:
         assets = [a for a in release['assets'] if a['name'] == 'manifest.json']
         if not assets:
-            # A missing historical asset could conceal an earlier arrival.
-            # Fail rather than quietly assert a later first-availability date.
-            raise ValueError(f"Release {release['tag_name']} has no manifest")
+            # Non-catalog releases (e.g. workflow experiments) did not deliver
+            # a manifest to the Wizard and therefore supply no discovery dates.
+            print(f"Skipping {release['tag_name']}: no manifest.json asset")
+            continue
         manifest = download_json(assets[0]['browser_download_url'])
         if not isinstance(manifest, dict) or not manifest:
             raise ValueError(f"Invalid manifest for {release['tag_name']}")
-        aliases = table_renames(history and history['latestRelease'], release['tag_name'], cwd, ref_prefix)
+        aliases = table_renames(history and history['latestRelease'], release['tag_name'], cwd)
         history = advance(history, manifest, release['tag_name'], release['published_at'], aliases)
         print(f"{release['tag_name']}: {len(manifest)} tables")
     return history
@@ -124,22 +125,6 @@ def catalog_assets(release):
                 if asset['name'] in ('manifest.json', 'table-history.json')]
     return list(release.get_assets())
 
-def source_history(source, published_at):
-    """Seed forks from the upstream catalog, not unrelated fork test releases.
-
-    Forks can reuse upstream tag names for different commits, so fetch upstream
-    tags into a separate namespace for accurate table-rename detection.
-    """
-    ref_prefix = 'refs/catalog-history/source/'
-    subprocess.run(['git', 'fetch', '--no-tags', '--filter=blob:none', source.clone_url,
-                    f'+refs/tags/*:{ref_prefix}*'], check=True)
-    releases = [release_record(r, catalog_assets(r)) for r in source.get_releases()
-                if not r.draft and not r.prerelease and r.published_at <= published_at]
-    history = backfill(source.full_name, releases=releases, ref_prefix=ref_prefix)
-    if not history:
-        raise ValueError(f'No published catalog history in {source.full_name}')
-    return history, f"{ref_prefix}{history['latestRelease']}"
-
 def release_history(repo, release, tables):
     """Load release assets only, bootstrapping missing history from manifests.
 
@@ -149,7 +134,6 @@ def release_history(repo, release, tables):
     """
     history = None
     pending = []
-    previous_ref = None
     candidates = sorted((r for r in repo.get_releases() if not r.draft and not r.prerelease
                          and r.published_at <= release.published_at),
                         key=lambda r: r.published_at, reverse=True)
@@ -167,18 +151,17 @@ def release_history(repo, release, tables):
         # Its complete replacement is supplied in tables below.
         if previous.tag_name != release.tag_name:
             pending.append(release_record(previous, assets))
-    if history is None and getattr(repo, 'fork', False) and repo.source:
-        history, previous_ref = source_history(repo.source, release.published_at)
-    else:
-        history = backfill(repo.full_name, releases=pending, history=history)
-    aliases = table_renames(history and history.get('latestRelease'), release.tag_name,
-                            previous_ref=previous_ref)
+    # History is repository-local, including for forks. Never consult parent
+    # or source releases: their publication dates describe a different catalog.
+    history = backfill(repo.full_name, releases=pending, history=history)
+    aliases = table_renames(history and history.get('latestRelease'), release.tag_name)
     date = release.published_at.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
     return advance(history, tables, release.tag_name, date, aliases)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Backfill table discovery metadata from published manifests (read-only).')
-    parser.add_argument('--repo', default='LegendsUnchained/vpx-standalone-alp4k')
+    parser.add_argument('--repo', required=True,
+                        help='Repository whose release dates to use (owner/repo).')
     parser.add_argument('--output', required=True,
                         help='Output asset path, e.g. /tmp/table-history.json (not source data).')
     args = parser.parse_args()
