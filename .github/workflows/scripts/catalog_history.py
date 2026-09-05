@@ -9,6 +9,7 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
+from types import SimpleNamespace
 from urllib.request import urlopen
 from datetime import datetime, timezone
 
@@ -114,6 +115,15 @@ def release_record(release, assets):
                    for a in assets],
     }
 
+def catalog_assets(release):
+    # The releases API already embeds asset metadata. Avoid re-fetching every
+    # page of hundreds of table ZIPs just to find the two catalog JSON files.
+    embedded = getattr(release, 'raw_data', {}).get('assets')
+    if embedded is not None:
+        return [SimpleNamespace(**asset) for asset in embedded
+                if asset['name'] in ('manifest.json', 'table-history.json')]
+    return list(release.get_assets())
+
 def source_history(source, published_at):
     """Seed forks from the upstream catalog, not unrelated fork test releases.
 
@@ -123,7 +133,7 @@ def source_history(source, published_at):
     ref_prefix = 'refs/catalog-history/source/'
     subprocess.run(['git', 'fetch', '--no-tags', '--filter=blob:none', source.clone_url,
                     f'+refs/tags/*:{ref_prefix}*'], check=True)
-    releases = [release_record(r, r.get_assets()) for r in source.get_releases()
+    releases = [release_record(r, catalog_assets(r)) for r in source.get_releases()
                 if not r.draft and not r.prerelease and r.published_at <= published_at]
     history = backfill(source.full_name, releases=releases, ref_prefix=ref_prefix)
     if not history:
@@ -144,7 +154,7 @@ def release_history(repo, release, tables):
                          and r.published_at <= release.published_at),
                         key=lambda r: r.published_at, reverse=True)
     for previous in candidates:
-        assets = list(previous.get_assets())
+        assets = catalog_assets(previous)
         asset = next((a for a in assets if a.name == 'table-history.json'), None)
         if asset:
             history = download_json(asset.browser_download_url)

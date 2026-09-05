@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
-from catalog_history import advance, stamp, fingerprint, table_renames, release_history, utc
+from catalog_history import advance, stamp, fingerprint, table_renames, release_history, utc, catalog_assets
 
 D1 = '2025-01-01T00:00:00Z'
 D2 = '2026-09-01T00:00:00Z'
@@ -21,6 +21,15 @@ def repository(*releases):
     return SimpleNamespace(full_name='test/catalog', get_releases=lambda: releases)
 
 class HistoryTests(unittest.TestCase):
+    def test_reuses_embedded_asset_metadata_without_paginating_table_zips(self):
+        release = SimpleNamespace(raw_data={'assets': [
+            {'name': 'table.zip', 'browser_download_url': 'zip'},
+            {'name': 'manifest.json', 'browser_download_url': 'manifest'},
+            {'name': 'table-history.json', 'browser_download_url': 'history'},
+        ]})
+        self.assertEqual([a.name for a in catalog_assets(release)],
+                         ['manifest.json', 'table-history.json'])
+
     @patch('catalog_history.table_renames', return_value={})
     @patch('catalog_history.source_history')
     def test_fork_bootstraps_upstream_instead_of_old_test_releases(self, source, renames):
