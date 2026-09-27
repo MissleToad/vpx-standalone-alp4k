@@ -694,12 +694,18 @@ Sub GameTimer_Timer
 	RollingUpdate
 	updateXlights
 	Insertupdate
+	' 2026-09-26: the bones were read and rewritten every tick (72 object calls at rest). BoneY mirrors each
+	' bone's transy (only this timer moves them); a bone is written only while it is down or rising. tmp was
+	' never assigned in the original, so the lighting term was transy / 133.
 	For x = 0 to ubound(Bonearray)
-		If bonearray(x).transy < 0 Then bonearray(x).transy = bonearray(x).transy + 0.2 
-		bonearray(x).blenddisablelighting = (( tmp / 2 ) + (bonearray(x).transy)) / 133
+		If BoneY(x) < 0 Then
+			BoneY(x) = BoneY(x) + 0.2
+			bonearray(x).transy = BoneY(x)
+			bonearray(x).blenddisablelighting = BoneY(x) / 133
+		End If
 	Next
 	For x = 0 to 5
-		If BonesDown(x) > -1 Then Bonearray(BonesDown(x)).transy = Bonearray(BonesDown(x)).transy - 0.6 
+		If BonesDown(x) > -1 Then BoneY(BonesDown(x)) = BoneY(BonesDown(x)) - 0.6 : Bonearray(BonesDown(x)).transy = BoneY(BonesDown(x)) : Bonearray(BonesDown(x)).blenddisablelighting = BoneY(BonesDown(x)) / 133
 	Next
 	If Follower Then MoveFollower
 	If gi033.state = 1 Then
@@ -719,10 +725,13 @@ Sub GameTimer_Timer
 		If rl(x+6) > rl(x) Then rl(x+6) = rl(x+6) - 6 : If rl(x+6) < rl(x) Then rl(x+6) = rl(x) 
 	Next
     Dim bulb
+	If GIApplied(7) <> rl(7) Or GIApplied(8) <> rl(8) Or GIApplied(9) <> rl(9) Or GIApplied(10) <> rl(10) Or GIApplied(11) <> rl(11) Or GIApplied(12) <> rl(12) Then ' 2026-09-26: only rewrite the bulbs when the GI fade moved
+		For x = 7 to 12 : GIApplied(x) = rl(x) : Next
 	For each bulb in aGILights
         bulb.color		= rgb( rl(7) , rl(8) , rl(9) )
         bulb.colorfull	= rgb( rl(10) , rl(11) , rl(12) ) 
     Next
+	End If
 
 	x = 0
 	If Blink(43,1) = 2 And Primitive154.z > 124 Then x = li043.getinplayintensity / 11
@@ -758,7 +767,7 @@ Sub updateXlights
 			End Select
 		End If
 		If xlight(tmp,0) = 1 Then
-			xlight(tmp,0) = 2 
+			xlight(tmp,0) = 2 : xlight(tmp,6) = 0
 			x.blenddisablelighting = Xon
 			If xlight(tmp,5) > 0 Then
 				x.image = "xmas"& xlight(tmp,5)
@@ -766,8 +775,11 @@ Sub updateXlights
 				x.image = "xmas"& Int(rnd(1)*4)+1
 			End If
 		Elseif xlight(tmp,0) = 0 then
-			x.image ="xmas" & 1 + tmp mod 4
-			x.blenddisablelighting = 0.3
+			If xlight(tmp,6) <> 1 Then
+				x.image ="xmas" & 1 + tmp mod 4
+				x.blenddisablelighting = 0.3
+				xlight(tmp,6) = 1
+			End If
 		End If
 		tmp = tmp + 1
 	Next
@@ -793,7 +805,7 @@ Sub updateXlights
 			End Select
 		End If
 		If xlight(tmp,0) = 1 Then
-			xlight(tmp,0) = 2 
+			xlight(tmp,0) = 2 : xlight(tmp,6) = 0
 			x.blenddisablelighting = Xon
 			If xlight(tmp,5) > 0 Then
 				x.image = "xmas"& xlight(tmp,5)
@@ -801,8 +813,11 @@ Sub updateXlights
 				x.image = "xmas"& Int(rnd(1)*4)+1
 			End If
 		Elseif xlight(tmp,0) = 0 then
-			x.image ="xmas" & 1 + tmp mod 4
-			x.blenddisablelighting = 0.3
+			If xlight(tmp,6) <> 1 Then
+				x.image ="xmas" & 1 + tmp mod 4
+				x.blenddisablelighting = 0.3
+				xlight(tmp,6) = 1
+			End If
 		End If
 		tmp = tmp + 1
 	Next
@@ -828,7 +843,7 @@ Sub updateXlights
 			End Select
 		End If
 		If xlight(tmp,0) = 1 Then
-			xlight(tmp,0) = 2 
+			xlight(tmp,0) = 2 : xlight(tmp,6) = 0
 			x.blenddisablelighting = Xon
 			If xlight(tmp,5) > 0 Then
 				x.image = "xmas"& xlight(tmp,5)
@@ -836,8 +851,11 @@ Sub updateXlights
 				x.image = "xmas"& Int(rnd(1)*4)+1
 			End If
 		Elseif xlight(tmp,0) = 0 then
-			x.image ="xmas" & 1 + tmp mod 4
-			x.blenddisablelighting = 0.3
+			If xlight(tmp,6) <> 1 Then
+				x.image ="xmas" & 1 + tmp mod 4
+				x.blenddisablelighting = 0.3
+				xlight(tmp,6) = 1
+			End If
 		End If
 		tmp = tmp + 1
 	Next
@@ -863,7 +881,7 @@ Sub updateXlights
 			End Select
 		End If
 		If xlight(tmp,0) = 1 Then
-			xlight(tmp,0) = 2 
+			xlight(tmp,0) = 2 : xlight(tmp,6) = 0
 			x.blenddisablelighting = Xon
 			If xlight(tmp,5) > 0 Then
 				x.image = "xmas"& xlight(tmp,5)
@@ -871,8 +889,11 @@ Sub updateXlights
 				x.image = "xmas"& Int(rnd(1)*4)+1
 			End If
 		Elseif xlight(tmp,0) = 0 then
-			x.image ="xmas" & 1 + tmp mod 4
-			x.blenddisablelighting = 0.3
+			If xlight(tmp,6) <> 1 Then
+				x.image ="xmas" & 1 + tmp mod 4
+				x.blenddisablelighting = 0.3
+				xlight(tmp,6) = 1
+			End If
 		End If
 		tmp = tmp + 1
 	Next
@@ -898,7 +919,7 @@ Sub updateXlights
 			End Select
 		End If
 		If xlight(tmp,0) = 1 Then
-			xlight(tmp,0) = 2 
+			xlight(tmp,0) = 2 : xlight(tmp,6) = 0
 			x.blenddisablelighting = Xon
 			If xlight(tmp,5) > 0 Then
 				x.image = "xmas"& xlight(tmp,5)
@@ -906,8 +927,11 @@ Sub updateXlights
 				x.image = "xmas"& Int(rnd(1)*4)+1
 			End If
 		Elseif xlight(tmp,0) = 0 then
-			x.image ="xmas" & 1 + tmp mod 4
-			x.blenddisablelighting = 0.3
+			If xlight(tmp,6) <> 1 Then
+				x.image ="xmas" & 1 + tmp mod 4
+				x.blenddisablelighting = 0.3
+				xlight(tmp,6) = 1
+			End If
 		End If
 		tmp = tmp + 1
 	Next
@@ -972,7 +996,7 @@ End Sub
 ' bottomtop	201->230
 
 
-Dim xlight(250,5)
+Dim xlight(250,6) ' column 6: off-state image already applied (updateXlights re-applied it every 13 ms tick)
 Sub setupXlights
 	Dim x
 	For x = 0 to 250 
@@ -2881,13 +2905,11 @@ dim flasher4state : flasher4state = 0
 dim flasher5state : flasher5state = 0
 
 FrameTimer.interval = -1
+Dim FrameTimerParity : FrameTimerParity = False ' the light cosmetics alternate halves per frame (see FrameTimerLightsA/B)
 Sub FrameTimer_Timer
-	dim tmp, BL, testlight,x, tmp2,z
-
+	dim tmp2
+	tmp2 = gi033.GetInPlayIntensity / 246 ' (gi033 / 123) / 2, as the original body computed it
 	Primitive156.roty = Spinner003.currentangle - 45
-
-	zero2.blenddisablelighting = zerolight.GetInPlayIntensity * 5
-
 	LFLogo.RotZ = LeftFlipper.CurrentAngle
 	LFLogo1.RotZ = LeftFlipper.CurrentAngle
 	RFlogo.RotZ = RightFlipper.CurrentAngle
@@ -2897,6 +2919,58 @@ Sub FrameTimer_Timer
 	FlipperRSh.RotZ = RightFlipper.CurrentAngle
 	LFLogo001.RotZ = LeftFlipper001.CurrentAngle
 	LFLogo002.RotZ = LeftFlipper001.CurrentAngle
+	If f4.GetInPlayStateBool = true And flasher5state = 0 Then flasher5state = 1 : objlevel(5) = 1 : Flasherflash5_Timer
+	If f4.getinplaystatebool = false Then flasher5state = 0
+	If f5.GetInPlayStateBool = true And flasher4state = 0 Then flasher4state = 1 : objlevel(4) = 1 : Flasherflash4_Timer
+	If f5.getinplaystatebool = false Then flasher4state = 0
+	If f2b.GetInPlayStateBool = true And flasher2state = 0 Then flasher2state = 1 : objlevel(2) = 1 : Flasherflash2_Timer
+	If f2b.getinplaystatebool = false Then flasher2state = 0
+	If f1b.GetInPlayStateBool = true And flasher3state = 0 Then flasher3state = 1 : objlevel(3) = 1 : Flasherflash3_Timer
+	If f1b.getinplaystatebool = false Then flasher3state = 0
+	Primitive150.transz = -77 + Plunger.Position * 4 + ShakeStuff1
+	Primitive148.transz = -77 + Plunger.Position * 4 + ShakeStuff1
+	Primitive187.transz = -77 + Plunger.Position * 4 + ShakeStuff1
+	Primitive187.transy = ShakeStuff1 + ShakeStuff3 / 2
+	If shakestuff1 + Shakestuff3 > 0 and Plunger.Position < 5 then
+		light006.state = 1
+		flasher021.visible = 1
+	Else
+		light006.state = 0
+		flasher021.visible = 0
+	End If
+	Primitive187.transz = -77 + Plunger.Position * 4 + ShakeStuff1
+
+	Primitive149.transz = -77 + Plunger.Position * 4 + ShakeStuff1
+	Primitive146.transz = -77 + Plunger.Position * 4 + ShakeStuff1
+	Primitive012.transz = -77 + Plunger.Position * 4 + ShakeStuff1
+	If greenoogie = True Then
+		Primitive154.material = "Oogiegreen"
+		Primitive154.blenddisablelighting = tmp2*15 + ObjLevel(1)	' oogie
+		If primitive154.z < 125 Then
+			primitive154.z = primitive154.z + 0.05
+		End If
+	Else
+
+		Primitive154.material = "Plastic"
+		Primitive154.blenddisablelighting = tmp2*2 + ObjLevel(1)/2	' oogie
+		If primitive154.z > 105 Then
+			primitive154.z = primitive154.z - 0.05
+		End If
+	End If
+	' 2026-09-26: ~300 light-driven cosmetic writes ran here every frame (4-8 ms of script per frame on the
+	' ALP4K). They now alternate between two halves, so each cosmetic updates at 30 Hz and a frame carries
+	' half the cost. Rotations, flasher edges, the plunger and Oogie stay per-frame above.
+	FrameTimerParity = Not FrameTimerParity
+	If FrameTimerParity Then FrameTimerLightsA Else FrameTimerLightsB
+End Sub
+
+Sub FrameTimerLightsA
+	dim tmp, BL, testlight, x, tmp2, z, y, mb
+	mb = (( 50 - gi007.getinplayintensity ) / 120 )
+
+
+	zero2.blenddisablelighting = zerolight.GetInPlayIntensity * 5
+
 
 ' add any other real time update subs, like gates or diverters, flippers
 
@@ -2904,8 +2978,6 @@ Sub FrameTimer_Timer
 ' inserts
 	p003.blenddisablelighting = LightShootAgain.GetInPlayIntensity * 10  + mb
 
-	dim mb
-	mb = (( 50 - gi007.getinplayintensity ) / 120 )
 	p17.blenddisablelighting = li001.GetInPlayIntensity * (2.2 + mb)	' bottom lanes
 	p18.blenddisablelighting = li002.GetInPlayIntensity * (2.2 + mb)
 	p19.blenddisablelighting = li003.GetInPlayIntensity * (2.2 + mb)
@@ -3009,14 +3081,6 @@ Sub FrameTimer_Timer
 	Primitive123.COLOR = RGB(255,255- tmp*2,255- tmp*2 )
 
 
-	If f4.GetInPlayStateBool = true And flasher5state = 0 Then flasher5state = 1 : objlevel(5) = 1 : Flasherflash5_Timer
-	If f4.getinplaystatebool = false Then flasher5state = 0
-	If f5.GetInPlayStateBool = true And flasher4state = 0 Then flasher4state = 1 : objlevel(4) = 1 : Flasherflash4_Timer
-	If f5.getinplaystatebool = false Then flasher4state = 0
-	If f2b.GetInPlayStateBool = true And flasher2state = 0 Then flasher2state = 1 : objlevel(2) = 1 : Flasherflash2_Timer
-	If f2b.getinplaystatebool = false Then flasher2state = 0
-	If f1b.GetInPlayStateBool = true And flasher3state = 0 Then flasher3state = 1 : objlevel(3) = 1 : Flasherflash3_Timer
-	If f1b.getinplaystatebool = false Then flasher3state = 0
 	tmp = F2B.GetInPlayIntensity ' Rightflasher red
 	tmp2 = gi033.GetInPlayIntensity / 123
 
@@ -3066,7 +3130,6 @@ Sub FrameTimer_Timer
 
 
 	x = backwalllight.getinplayintensity * 8
-	dim y
 	For y = 0 to 8
 		If TeenLight = y Then Teenkiller(y).opacity = x + mb Else Teenkiller(y).opacity = 0
 	Next
@@ -3083,6 +3146,10 @@ Sub FrameTimer_Timer
 	gibulbs004.blenddisablelighting = gi033.GetInPlayIntensity 
 	gibulbs006.blenddisablelighting = gi033.GetInPlayIntensity / 5
 	gibulbs005.blenddisablelighting = gi033.GetInPlayIntensity / 7
+End Sub
+
+Sub FrameTimerLightsB
+	dim tmp, BL, testlight, x, tmp2, z
 
 	gibulbs001.color = gi033.colorfull
 	gibulbs002.color = gi033.colorfull
@@ -3175,22 +3242,6 @@ Sub FrameTimer_Timer
 
 	Primitive189.blenddisablelighting = tmp2
 
-	Primitive150.transz = -77 + Plunger.Position * 4 + ShakeStuff1
-	Primitive148.transz = -77 + Plunger.Position * 4 + ShakeStuff1
-	Primitive187.transz = -77 + Plunger.Position * 4 + ShakeStuff1
-	Primitive187.transy = ShakeStuff1 + ShakeStuff3 / 2
-	If shakestuff1 + Shakestuff3 > 0 and Plunger.Position < 5 then
-		light006.state = 1
-		flasher021.visible = 1
-	Else
-		light006.state = 0
-		flasher021.visible = 0
-	End If
-	Primitive187.transz = -77 + Plunger.Position * 4 + ShakeStuff1
-
-	Primitive149.transz = -77 + Plunger.Position * 4 + ShakeStuff1
-	Primitive146.transz = -77 + Plunger.Position * 4 + ShakeStuff1
-	Primitive012.transz = -77 + Plunger.Position * 4 + ShakeStuff1
 	Primitive155.transy = PoliceL22.getinplayintensity /10		' spinnerman
 	Primitive156.transy = PoliceL22.getinplayintensity /10
 	Primitive157.transy = PoliceL22.getinplayintensity /10
@@ -3247,20 +3298,6 @@ Sub FrameTimer_Timer
 	Primitive081.blenddisablelighting = tmp2
 	Primitive052.blenddisablelighting = tmp2
 
-	If greenoogie = True Then
-		Primitive154.material = "Oogiegreen"
-		Primitive154.blenddisablelighting = tmp2*15 + ObjLevel(1)	' oogie
-		If primitive154.z < 125 Then
-			primitive154.z = primitive154.z + 0.05
-		End If
-	Else
-
-		Primitive154.material = "Plastic"
-		Primitive154.blenddisablelighting = tmp2*2 + ObjLevel(1)/2	' oogie
-		If primitive154.z > 105 Then
-			primitive154.z = primitive154.z - 0.05
-		End If
-	End If
 
 
 	Primitive126.blenddisablelighting = tmp2
@@ -3344,6 +3381,8 @@ End Sub
 Dim Followball
 Dim Bonearray
 Bonearray = array(primitive111,primitive112,primitive113,primitive114,primitive275,primitive279,primitive019,primitive023,primitive024,primitive027,primitive026,primitive025,primitive054,primitive053 ,primitive051 ,primitive063 ,primitive062 ,primitive061,primitive060 ,primitive059 ,primitive058 ,primitive057 ,primitive056 ,primitive055 ,primitive281 ,primitive282,primitive283 ,primitive284 ,primitive285 ,primitive286 ,primitive287,primitive288,primitive289,primitive290,primitive291,primitive292)
+Dim BoneY(40) ' script-side copy of each bone's transy, seeded from the objects (see GameTimer_Timer)
+For x = 0 to ubound(Bonearray) : BoneY(x) = Bonearray(x).transy : Bonearray(x).blenddisablelighting = BoneY(x) / 133 : Next
 Dim BonesDown(6)
 BonesDown(0) = -1
 BonesDown(1) = -1
@@ -3482,6 +3521,7 @@ Const white = 11
 Const teal = 10
 
 Dim rl(12)
+Dim GIApplied(12) : GIApplied(7) = -1 ' last GI colour written to the bulbs (GameTimer)
 
 
 Sub ChangeGi(col)
@@ -7378,6 +7418,7 @@ Dim SplashImage
 Dim SplashImage2
 Dim SplashImage3
 Dim SplashBlink : SplashBlink = 0
+Dim SplashPupSent : SplashPupSent = False ' one pupevent per splash, not per DMD tick
 
 Dim SplashQ(20,9)
 
@@ -7423,6 +7464,7 @@ Sub NextSplashQ
 	SplashImage2 = SplashQ(1,8)
 	SplashImage3 = SplashQ(1,9)
 	SplashBlink = 1
+	SplashPupSent = False
 	
 	For x = 1 to 19
 		For y = 1 to 9
@@ -7493,6 +7535,7 @@ Sub DMD_StartSplash ( text1 ,text2 , font1 , font2 , time , effect , image,image
 	SplashImage2 = image2
 	SplashImage3 = image3
 	SplashBlink = 1
+	SplashPupSent = False
 End Sub
 
 
@@ -7621,7 +7664,7 @@ Sub DMD_showsplash
 			End If
 		Case "extraball"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 813
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 813
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zWizB1").Bitmap	
 			If SplashBlink mod 7 = 1 Then
 				revivecounter = revivecounter + 1
@@ -7644,7 +7687,7 @@ Sub DMD_showsplash
 				case 63 : DMDScene.GetImage("Last2").visible = True
 					DMDScene.GetImage("Last2").Bitmap = FlexDMD.NewImage("", "VPX.zExtraball7").Bitmap
 				case 71 : DMDScene.GetImage("Last2").visible = True
-					DMDScene.GetImage("Last2").Bitmap = FlexDMD.NewImage("", "VPX.zExtraball8").Bitmap ': pupevent 813
+					DMDScene.GetImage("Last2").Bitmap = FlexDMD.NewImage("", "VPX.zExtraball8").Bitmap ': If Not SplashPupSent Then SplashPupSent = True : pupevent 813
 			End Select
 
 			If SplashBlink > 80 Then
@@ -7694,7 +7737,7 @@ Sub DMD_showsplash
 
 		Case "wiz8start"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 988
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 988
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX." & wizframes(6) & "1").Bitmap
 			If SplashBlink mod 3 = 1 Then
 				revivecounter = revivecounter + 1
@@ -7721,7 +7764,7 @@ Sub DMD_showsplash
 
 		Case "wiz7start"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 987
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 987
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX." & wizframes(WizardBackground) & "1").Bitmap
 			If SplashBlink mod 3 = 1 Then
 				revivecounter = revivecounter + 1
@@ -7751,7 +7794,7 @@ Sub DMD_showsplash
 			If SplashBlink = 20 Then PlayVoice "vo_hailtothepumkinking"
 		Case "wiz6start"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 985
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 985
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX." & wizframes(WizardBackground) & "1").Bitmap	
 			If SplashBlink mod 3 = 1 Then
 				revivecounter = revivecounter + 1
@@ -7784,7 +7827,7 @@ Sub DMD_showsplash
 
 		Case "wiz5start"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 984
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 984
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX." & wizframes(WizardBackground) & "1").Bitmap
 			If SplashBlink mod 3 = 1 Then
 				revivecounter = revivecounter + 1
@@ -7828,7 +7871,7 @@ Sub DMD_showsplash
 
 		Case "wiz4start"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 983
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 983
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX." & wizframes(WizardBackground) & "1").Bitmap
 			If SplashBlink mod 3 = 1 Then
 				revivecounter = revivecounter + 1
@@ -7847,7 +7890,7 @@ Sub DMD_showsplash
 
 		Case "wiz3start"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 982
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 982
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX." & wizframes(WizardBackground) & "1").Bitmap
 			If SplashBlink mod 3 = 1 Then
 				revivecounter = revivecounter + 1
@@ -7880,7 +7923,7 @@ Sub DMD_showsplash
 
 		Case "wiz2start"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 981
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 981
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX." & wizframes(WizardBackground) & "1").Bitmap	
 			If SplashBlink mod 3 = 1 Then
 				revivecounter = revivecounter + 1
@@ -7913,7 +7956,7 @@ Sub DMD_showsplash
 
 		Case "wiz1start"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 980
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 980
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zRedjack1").Bitmap	
 			If SplashBlink mod 3 = 1 Then
 				revivecounter = revivecounter + 1
@@ -7949,7 +7992,7 @@ Sub DMD_showsplash
 'DMD_StartSplash " "," " ,FontHugeOrange, FontHugeRedhalf,120 , "whatsthisstart" ,999,0,0
 		Case "whatsthisstart"	
 			DMDScene.GetImage("Last").visible = True
-            pupevent 903
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 903
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zWhatsthisb1").Bitmap : PlayVoice "vo_letmeout"	     'idig
 			If SplashBlink mod 4 = 1 Then
 				revivecounter = revivecounter + 1
@@ -7981,7 +8024,7 @@ Sub DMD_showsplash
 
 		Case "whatsthisfinish"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 932
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 932
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zWhatsthisA1").Bitmap   
 			If SplashBlink mod 4 = 1 Then
 				revivecounter = revivecounter + 1
@@ -7991,7 +8034,7 @@ Sub DMD_showsplash
 			Else
 				DMDScene.GetLabel("Lasttext1").visible = True
 				DMDScene.GetLabel("Lasttext1").font = FontHugeOrange
-				DMDScene.GetLabel("Lasttext1").text = "WHATS THIS COMPLETE" : pupevent 932
+				DMDScene.GetLabel("Lasttext1").text = "WHATS THIS COMPLETE" : If Not SplashPupSent Then SplashPupSent = True : pupevent 932
 				DMDScene.GetLabel("Lasttext1").SetAlignedPosition FlexSizeX/2,FlexSizey/2, FlexDMD_Align_center
 			End If
 
@@ -7999,8 +8042,8 @@ Sub DMD_showsplash
 
 
 		Case "townmeetingstart"
-			DMDScene.GetImage("Last").visible = True : pupevent 901
-            pupevent 901
+			DMDScene.GetImage("Last").visible = True : If Not SplashPupSent Then SplashPupSent = True : pupevent 901
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 901
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zTownMeetingA1").Bitmap : PlaySound "vo_townmeetingtonight",1,BackboxVolume	    'idig
 			If SplashBlink mod 4 = 1 Then
 				revivecounter = revivecounter + 1
@@ -8032,7 +8075,7 @@ Sub DMD_showsplash
 
 		Case "townmeetingfinish"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 930
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 930
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zTownMeetingB1").Bitmap	
 			If SplashBlink mod 4 = 1 Then
 				revivecounter = revivecounter + 1
@@ -8043,7 +8086,7 @@ Sub DMD_showsplash
 
 				DMDScene.GetLabel("Lasttext1").visible = True
 				DMDScene.GetLabel("Lasttext1").font = FontHugeOrange
-				DMDScene.GetLabel("Lasttext1").text = "TOWNMEETING OVER" : pupevent 930
+				DMDScene.GetLabel("Lasttext1").text = "TOWNMEETING OVER" : If Not SplashPupSent Then SplashPupSent = True : pupevent 930
 				DMDScene.GetLabel("Lasttext1").SetAlignedPosition FlexSizeX/2,FlexSizey/2, FlexDMD_Align_center
 				
 			End If
@@ -8051,7 +8094,7 @@ Sub DMD_showsplash
 
 		Case "bequickstart"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 902
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 902
 			DMDScene.GetImage("Last2").visible = True
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zJackbequick1").Bitmap : PlayVoice "vo_bequick-008"    'idig
 
@@ -8097,7 +8140,7 @@ Sub DMD_showsplash
 
 		Case "bequickfinish"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 931
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 931
 			DMDScene.GetImage("Last2").visible = True
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zJackbequick1").Bitmap	
 			If SplashBlink mod 4 = 1 Then
@@ -8117,7 +8160,7 @@ Sub DMD_showsplash
 		Case "nimblestart"
 			
 			DMDScene.GetImage("Last").visible = True
-            pupevent 906
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 906
 			DMDScene.GetImage("Last2").visible = True
 			DMDScene.GetImage("Last2").Bitmap = FlexDMD.NewImage("", "VPX.zNimble7").Bitmap 
 	'		If SplashBlink = 10 Then Playsfx ""
@@ -8152,7 +8195,7 @@ Sub DMD_showsplash
 
 		Case "nimblefinish"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 934
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 934
 			If SplashBlink mod 26 < 13 Then 
 				DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zNimble1").Bitmap	
 			Else 
@@ -8171,7 +8214,7 @@ Sub DMD_showsplash
 			
 			If SplashBlink mod 80 < 16 Then 
 				DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zDaysleftbg1").Bitmap	
-                pupevent 905		
+                If Not SplashPupSent Then SplashPupSent = True : pupevent 905		
 			Elseif SplashBlink mod 80 < 32 Then 
 				DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zDaysleftbg2").Bitmap			
 			Elseif SplashBlink mod 80 < 48 Then 
@@ -8184,7 +8227,7 @@ Sub DMD_showsplash
 
 		Case "80dayscomplete" '678
 			If SplashBlink = 10 Then
-               pupevent 933
+               If Not SplashPupSent Then SplashPupSent = True : pupevent 933
 				PlaySound "_merryxmasjack" ,1,BackboxVolume'idig
 				PlaySound "sfx_crowdcheer",1,BackboxVolume/3.45 'idig
 				ChangeSong				   'idig
@@ -8199,7 +8242,7 @@ Sub DMD_showsplash
 				DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zDaysleftbg7").Bitmap			
 			Else
 				DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zDaysleftbg8").Bitmap
-                pupevent 820			
+                If Not SplashPupSent Then SplashPupSent = True : pupevent 820			
 			End If
 
 		Case "80daysupdate"
@@ -8294,7 +8337,7 @@ Sub DMD_showsplash
 
 		Case "balllost"' 1 til 10 + 10+11
 			DMDScene.GetImage("Last").visible = True
-            pupevent 801
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 801
 			If revivecounter < 9 Then
 				If SplashBlink mod 5 = 2 Then
 					revivecounter = revivecounter + 1
@@ -8318,11 +8361,11 @@ Sub DMD_showsplash
 
 		Case "revive"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 819
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 819
 			If SplashBlink mod 5 = 2 Then
 				revivecounter = revivecounter + 1
 				If revivecounter = 7 Then revivecounter = 1 
-				DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zRevive" &  revivecounter ).Bitmap ': pupevent 819
+				DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zRevive" &  revivecounter ).Bitmap ': If Not SplashPupSent Then SplashPupSent = True : pupevent 819
 			End If
 		Case "workers"
 			DMDScene.GetImage("Last").visible = True
@@ -8360,12 +8403,12 @@ Sub DMD_showsplash
 
 		Case "sandyclaws"
 			DMDScene.GetImage("Last").visible = True 
-            pupevent 904
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 904
             'pupevent 818
 			Select Case ModeProgress
 				Case 0  ' intro
 					If SplashBlink mod 120 < 60 Then
-                       pupevent 904
+                       If Not SplashPupSent Then SplashPupSent = True : pupevent 904
 						DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zSandyclaws10").Bitmap 
 					Else
 						DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zSandyclaws11").Bitmap
@@ -8387,7 +8430,7 @@ Sub DMD_showsplash
 					If SplashBlink mod 25= 12 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zSandyclaws8").Bitmap
 				case 6
 					If SplashBlink mod 25= 1 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zSandyclaws3").Bitmap
-					If SplashBlink mod 25= 12 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zSandyclaws9").Bitmap  ': pupevent 819
+					If SplashBlink mod 25= 12 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zSandyclaws9").Bitmap  ': If Not SplashPupSent Then SplashPupSent = True : pupevent 819
 			End Select
 
 		case "sandyclaws2"
@@ -8413,7 +8456,7 @@ Sub DMD_showsplash
 		Case "savechristmas"
 		
 			DMDScene.GetImage("Last").visible = True
-            pupevent 907
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 907
 			DMDScene.GetImage("Last2").visible = True 
 			If revivecounter = 0 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zSavechristmas1").Bitmap : revivecounter = 1 : SplashBlink = 3 : DMDScene.GetImage("Last2").Bitmap = FlexDMD.NewImage("", "VPX.zSavechristmas1").Bitmap : savexmascallout   'idig
 			If SplashBlink mod 4 = 1 Then
@@ -8453,11 +8496,11 @@ Sub DMD_showsplash
 
 		Case "raisethedead"
 			DMDScene.GetImage("Last").visible = True
-            pupevent 900
+            If Not SplashPupSent Then SplashPupSent = True : pupevent 900
 			 If SplashBlink = 10 then shootthetargets
 			Select Case ModeProgress
 				Case 0  ' intro
-					If SplashBlink mod 40=  5 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zGraveyard7").Bitmap ': pupevent 821
+					If SplashBlink mod 40=  5 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zGraveyard7").Bitmap ': If Not SplashPupSent Then SplashPupSent = True : pupevent 821
 					If SplashBlink mod 40= 10 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zGraveyard8").Bitmap
 					If SplashBlink mod 40= 25 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zGraveyard9").Bitmap
 					If SplashBlink mod 40= 30 Then DMDScene.GetImage("Last").Bitmap = FlexDMD.NewImage("", "VPX.zGraveyard8").Bitmap
@@ -9636,6 +9679,7 @@ Sub ResetAllBlink
 			Blink(x,y) = 0
 		Next
 	Next
+	for x = 0 to 160 : Blink(x,10) = -1 : Next ' column 10: last state written by Insertupdate; -1 forces a write
 End Sub
 
 Sub Insertupdate
@@ -9644,13 +9688,13 @@ Sub Insertupdate
 	for each ins in InsertsAll 
 		If Blink(idx,2)>0 Then	' Lightsequencer ? + multipleblinks
 			If Blink(idx,8)>0 Then ' is there a delay ! ?=
-				ins.state = 0
+				If Blink(idx,10) <> 0 Then ins.state = 0 : Blink(idx,10) = 0
 				Blink(idx,8) = Blink(idx,8) - 1
 			Else
 				Select Case Blink(idx,3)
-					Case 0 : ins.state = 1 :  Blink(idx,5)=Blink(idx,4) : Blink(idx,3) = 1 
+					Case 0 : Blink(idx,5)=Blink(idx,4) : Blink(idx,3) = 1 : If Blink(idx,10) <> 1 Then ins.state = 1 : Blink(idx,10) = 1 
 					Case 1 : Blink(idx,5)=Blink(idx,5)-1 : If Blink(idx,5) < 1 Then Blink(idx,3) = 2
-					Case 2 : ins.state = 0   :  Blink(idx,7)=Blink(idx,6) : Blink(idx,3) = 3
+					Case 2 : Blink(idx,7)=Blink(idx,6) : Blink(idx,3) = 3 : If Blink(idx,10) <> 0 Then ins.state = 0 : Blink(idx,10) = 0
 					Case 3 : Blink(idx,7)=Blink(idx,7)-1 
 							 If Blink(idx,7) < 1 Then
 								Blink(idx,2)=Blink(idx,2)-1
@@ -9660,7 +9704,7 @@ Sub Insertupdate
 				End Select
 			End If
 		Else
-			ins.state = Blink(idx,1)
+			If Blink(idx,10) <> Blink(idx,1) Then ins.state = Blink(idx,1) : Blink(idx,10) = Blink(idx,1)
 		End If
 	idx=idx+1
 	Next
@@ -10963,8 +11007,9 @@ End Sub
 
 
 Dim InsertColors(20,14)
+Dim RGBInsertsPrime : RGBInsertsPrime = 3 ' first ticks always apply, so the materials start from the script's colours
 Sub Update_RGB_inserts
-	Dim tmp,y,col(5) , tmp2	
+	Dim tmp,y,col(5) , tmp2, moved, before	
 	For x = 1 to 17
 		tmp = 1																				' how many is on 
 		If ArrowLights(x,1) = 2 Then col(tmp) = 3 : tmp = tmp + 1 
@@ -10994,15 +11039,21 @@ Sub Update_RGB_inserts
 				If DMD_Frame mod 120 < 60 Then col(5) = col(3)
 				If DMD_Frame mod 120 < 30 Then col(5) = col(4)
 		End Select
+		moved = (RGBInsertsPrime > 0)
 		For y = 0 to 2
+			before = InsertColors(x,y)
 			tmp = InsertColors( x , y + col(5))
 			If InsertColors(x,y) < tmp Then InsertColors(x,y) = InsertColors(x,y) + 33 : If InsertColors(x,y) > tmp Then InsertColors(x,y) = tmp
 			If InsertColors(x,y) > tmp Then InsertColors(x,y) = InsertColors(x,y) - 33 : If InsertColors(x,y) < tmp Then InsertColors(x,y) = tmp
+			If InsertColors(x,y) <> before Then moved = True
 		Next
+		If moved Then ' 2026-09-26: 17 UpdateMaterial + 34 colour writes ran every 13 ms even at rest
 		UpdateMaterial "InsertPurpleOn" & x,0,0,1,1,1,0,0.999,rgb(InsertColors(x,0),InsertColors(x,1),InsertColors(x,2)),rgb(0,0,0),rgb(0,0,0),False,True,0,0,0,0
 		InsertsRGB(x-1).colorfull = RGB(InsertColors(x,0),InsertColors(x,1),InsertColors(x,2))
 		InsertsRGB(x-1).color = RGB(InsertColors(x,0),InsertColors(x,1),InsertColors(x,2))
+		End If
 	Next
+	If RGBInsertsPrime > 0 Then RGBInsertsPrime = RGBInsertsPrime - 1
 End Sub
 
 
