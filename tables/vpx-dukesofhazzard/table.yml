@@ -1,8 +1,8 @@
 ---
 backglassChecksum: "47DDF9413A98B732922E4277C1F504FB"
-backglassNotes: "Download - Dukes Of Hazzard (2022).directb2s"
+backglassNotes: "Download - Dukes Of Hazzard (2022).directb2s from the directb2s link, not the b2s next to the .vpx"
 backglassVPSId: "zaqvkCiAAV"
-fps: 58
+fps: 60
 pupArchiveFormat: "zip"
 pupArchiveRoot: "Dukes with VR Option Pup Pack/dukes"
 pupChecksum: "9AA9A6716319A53C0FCC1E0789EB33C8"
@@ -20,5 +20,7 @@ testers:
   - "Missile Toad"
   - "Wraith"
   - "pointdablame"
+  - "Filth"
+  - "rocjr73"
 vpxChecksum: "7B77CF1D06C90D4CF995435984A9DCB9"
 vpxVPSId: "g1WwIyskTw"
