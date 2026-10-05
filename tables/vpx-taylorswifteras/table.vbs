@@ -195,10 +195,14 @@ End Sub
 '*         HiRez00: Music Mod         *
 '**************************************
 
-' Current track and a short history so LeftMagnaSave can go back
+' Shuffle playlist (no repeats):
+'   - New game (and table load) shuffles all songs and starts at the top of that list
+'   - Right MagnaSave and songs ending on their own both move to the NEXT unplayed song
+'   - Every song plays once before any repeats; then a fresh shuffle starts
+'   - Left MagnaSave goes back through the songs already played this round
 Dim CurrentTrack : CurrentTrack = 0
-Dim MusicHistory(19)
-Dim MusicHistoryCount : MusicHistoryCount = 0
+Dim Playlist()
+Dim PlaylistPos : PlaylistPos = 0
 
 Sub PlayTrack(n)
 	CurrentTrack = n
@@ -206,45 +210,46 @@ Sub PlayTrack(n)
 	MusicIsOn = True
 End Sub
 
-Function RandomTrack()
-	Dim t
-	t = Int(NumMusicTracks * Rnd + 1)
+Sub ShufflePlaylist
+	Dim i, j, tmp
+	ReDim Playlist(NumMusicTracks)
+	For i = 1 To NumMusicTracks
+		Playlist(i) = i
+	Next
+	For i = NumMusicTracks To 2 Step -1		'Fisher-Yates shuffle
+		j = Int(i * Rnd) + 1
+		tmp = Playlist(i) : Playlist(i) = Playlist(j) : Playlist(j) = tmp
+	Next
+	' don't open the new round with the song that just played
 	If NumMusicTracks > 1 Then
-		Do While t = CurrentTrack		'never repeat the same song back to back
-			t = Int(NumMusicTracks * Rnd + 1)
-		Loop
+		If Playlist(1) = CurrentTrack Then
+			tmp = Playlist(1) : Playlist(1) = Playlist(2) : Playlist(2) = tmp
+		End If
 	End If
-	RandomTrack = t
-End Function
+	PlaylistPos = 1
+End Sub
 
-Sub PushMusicHistory(n)
-	Dim i
-	If n < 1 Then Exit Sub
-	If MusicHistoryCount > UBound(MusicHistory) Then	'full: drop the oldest
-		For i = 0 To UBound(MusicHistory) - 1
-			MusicHistory(i) = MusicHistory(i + 1)
-		Next
-		MusicHistoryCount = UBound(MusicHistory)
+Sub MusicOn		'new game / table load: fresh shuffle, first song
+	ShufflePlaylist
+	PlayTrack Playlist(PlaylistPos)
+End Sub
+
+Sub NextSong		'Right MagnaSave and end of song: next unplayed song
+	If PlaylistPos < 1 Then
+		MusicOn
+		Exit Sub
 	End If
-	MusicHistory(MusicHistoryCount) = n
-	MusicHistoryCount = MusicHistoryCount + 1
+	PlaylistPos = PlaylistPos + 1
+	If PlaylistPos > NumMusicTracks Then ShufflePlaylist	'all played: start a new round
+	PlayTrack Playlist(PlaylistPos)
 End Sub
 
-Sub MusicOn		'start a new random song (also used as "next song")
-	PushMusicHistory CurrentTrack
-	PlayTrack RandomTrack()
-End Sub
-
-Sub NextSong
-	MusicOn
-End Sub
-
-Sub PrevSong
-	If MusicHistoryCount > 0 Then
-		MusicHistoryCount = MusicHistoryCount - 1
-		PlayTrack MusicHistory(MusicHistoryCount)
+Sub PrevSong		'Left MagnaSave: back through this round's songs
+	If PlaylistPos > 1 Then
+		PlaylistPos = PlaylistPos - 1
+		PlayTrack Playlist(PlaylistPos)
 	ElseIf CurrentTrack > 0 Then
-		PlayTrack CurrentTrack		'no history yet: restart the current song
+		PlayTrack CurrentTrack		'at the first song: restart it
 	Else
 		MusicOn
 	End If
@@ -256,7 +261,7 @@ End Sub
 
 ' Fired by VPX when a song finishes on its own: roll straight into the next one
 Sub Table1_MusicDone
-	If MusicIsOn Then MusicOn
+	If MusicIsOn Then NextSong
 End Sub
 '******
 ' Keys
