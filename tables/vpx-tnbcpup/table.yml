@@ -1,0 +1,20 @@
+---
+fps: 60
+mainNotes: "Twas a long time ago, longer now than it seems..."
+pupArchiveFormat: "rar"
+pupArchiveRoot: "nightmarebc"
+pupChecksum: "E2F6562AE5705BB7F020A121D981AEA1"
+pupNotes: "Download - 'nightmarebc.rar' version 1.03"
+pupRequired: true
+pupVersion: "nightmarebc"
+pupVPSId: "zoLTjxJqwT"
+tableNotes: "Download - Nightmare Before Christmas(2024) v1.02.vpx"
+tableVPSId: "7jN8q3noP6"
+testers:
+  - "Missile Toad"
+  - "Wraith"
+  - "Dasme"
+  - "pointdablame"
+  - "Bla1ze"
+vpxChecksum: "24EFA8858AA00A86DD613BCD134619A6"
+vpxVPSId: "LI9FmU9PDM"
