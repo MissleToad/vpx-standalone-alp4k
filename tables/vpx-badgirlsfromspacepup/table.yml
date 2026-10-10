@@ -8,6 +8,7 @@ romNotes: "Download - flight2k.zip"
 romVPSId: "dUB_2qVCa7"
 tableNotes: "Download - Bad Girls from Space (PEandS1Ws Mod 2026).zip, Version 1.0"
 tableVPSId: "BtBYgrJljk"
+tableNameOverride: "Bad Girls from Space PUP"
 tagline: "Incoming Signal: The Bad Girls have landed"
 testers:
   - "Missile Toad"
