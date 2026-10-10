@@ -11,7 +11,9 @@ tableVPSId: "BtBYgrJljk"
 tagline: "Incoming Signal: The Bad Girls have landed"
 testers:
   - "Missile Toad"
-vpxChecksum: "3BDA7A482654F795486EED9ABED4152D"
+vpxChecksum:
+  - "A5D291ADD1BE2B33D1A3D39A4D6D0467"
+  - "3BDA7A482654F795486EED9ABED4152D"
 vpxVPSId: "3wY0nQ_K8f"
 vpxArchiveFormat: "zip"
 vpxExtractExtra:
