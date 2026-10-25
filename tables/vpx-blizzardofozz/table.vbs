@@ -108,6 +108,9 @@ Dim nDemDuration	' Dynamically sets the speech interval for Devil animation
 '----- General Sound Options -----
 Const VolumeDial = 0.9			  'Overall Mechanical sound effect volume. Recommended values should be no greater than 1.
 Const BallRollVolume = 1.0		  'Level of ball rolling volume. Value between 0 and 1
+' 4KP: flasher taming (big see-through flasher layers and fast light shows are the main GPU load on the RK3588)
+Const Opt4kpFlasherBloom = 0        ' dome flasher bloom glow over the playfield. 1 = on (stock), 0 = off
+Const Opt4kpLightShowInterval = 30  ' GI/insert/flasher light show step in ms. Stock 10
 Const RampRollVolume = 1.0		  'Level of ramp rolling volume. Value between 0 and 
 
 '****** PuP Variables ******
@@ -1326,13 +1329,13 @@ Sub GiEffect(n)
         Case 0 'all off
             LightSeqGi.Play SeqAlloff
         Case 1 'all blink
-            LightSeqGi.UpdateInterval = 10
+            LightSeqGi.UpdateInterval = Opt4kpLightShowInterval ' 4KP: was 10
             LightSeqGi.Play SeqBlinking, , 15, 10
         Case 2 'random
-            LightSeqGi.UpdateInterval = 10
+            LightSeqGi.UpdateInterval = Opt4kpLightShowInterval ' 4KP: was 10
             LightSeqGi.Play SeqRandom, 50, , 1000
         Case 3 'all blink fast
-            LightSeqGi.UpdateInterval = 10
+            LightSeqGi.UpdateInterval = Opt4kpLightShowInterval ' 4KP: was 10
             LightSeqGi.Play SeqBlinking, , 10, 10
     End Select
 End Sub
@@ -1342,13 +1345,13 @@ Sub LightEffect(n)
         Case 0 ' all off
             LightSeqInserts.Play SeqAlloff
         Case 1 'all blink
-            LightSeqInserts.UpdateInterval = 10
+            LightSeqInserts.UpdateInterval = Opt4kpLightShowInterval ' 4KP: was 10
             LightSeqInserts.Play SeqBlinking, , 15, 10
         Case 2 'random
-            LightSeqInserts.UpdateInterval = 10
+            LightSeqInserts.UpdateInterval = Opt4kpLightShowInterval ' 4KP: was 10
             LightSeqInserts.Play SeqRandom, 50, , 1000
         Case 3 'all blink fast
-            LightSeqInserts.UpdateInterval = 10
+            LightSeqInserts.UpdateInterval = Opt4kpLightShowInterval ' 4KP: was 10
             LightSeqInserts.Play SeqBlinking, , 10, 10
     End Select
 End Sub
@@ -1359,13 +1362,13 @@ Sub FlashEffect(n)
         Case 0 ' all off
             LightSeqFlasher.Play SeqAlloff
         Case 1 'all blink
-            LightSeqFlasher.UpdateInterval = 10
+            LightSeqFlasher.UpdateInterval = Opt4kpLightShowInterval ' 4KP: was 10
             LightSeqFlasher.Play SeqBlinking, , 10, 10
         Case 2 'random
-            LightSeqFlasher.UpdateInterval = 10
+            LightSeqFlasher.UpdateInterval = Opt4kpLightShowInterval ' 4KP: was 10
             LightSeqFlasher.Play SeqRandom, 50, , 1000
         Case 3 'all blink fast
-            LightSeqFlasher.UpdateInterval = 10
+            LightSeqFlasher.UpdateInterval = Opt4kpLightShowInterval ' 4KP: was 10
             LightSeqFlasher.Play SeqBlinking, , 5, 10
     End Select
 End Sub
@@ -13532,7 +13535,7 @@ Sub FlashFlasher(nr)
 	If Not objflasher(nr).TimerEnabled Then
 		objflasher(nr).TimerEnabled = True
 		objflasher(nr).visible = 1
-		objbloom(nr).visible = 1
+		objbloom(nr).visible = Opt4kpFlasherBloom ' 4KP: was 1
 		objlit(nr).visible = 1
 	End If
 	objflasher(nr).opacity = 1000 * FlasherFlareIntensity * ObjLevel(nr) ^ 2.5
@@ -13552,7 +13555,7 @@ Sub FlashFlasher(nr)
 		objflasher(nr).TimerEnabled = False
 	End If
 	'   ObjLevel(nr) = ObjLevel(nr) * 0.9 - 0.01
-	If ObjLevel(nr) < 0 Then
+	If ObjLevel(nr) <= 0 Then ' 4KP: was < 0, never true (level is clamped to 0 above), so the flash layers stayed on after the first flash
 		objflasher(nr).TimerEnabled = False
 		objflasher(nr).visible = 0
 		objbloom(nr).visible = 0
@@ -15280,7 +15283,7 @@ End Sub
 '===========================
 ' TIMER
 '===========================
-Dim SnowTicks : Const SnowShowMs = 5000 ' 4KP: how long the snow shows (ms)
+Dim SnowTicks : Const SnowShowMs = 2500 ' 4KP: how long the snow shows (ms)
 Sub tSnow_Timer()
     If Not SnowPlaying Then
         tSnow.Enabled = False
