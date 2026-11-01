@@ -1,0 +1,23 @@
+---
+backglassChecksum: "28D0BD79FBC90BDE564F5D1FF92EB594"
+backglassNotes: "Download - 'pinblob.directb2s', version 1.0.0"
+backglassVPSId: "z5QindQwh_"
+fps: 60
+pupArchiveFormat: "rar"
+pupArchiveRoot: "Pinblob (CLV 2024) V1.0/Pup Pack"
+pupBundled: true
+pupChecksum: "06BFE09FA0B642094F36AAA7DB6FC687"
+pupNotes: "Included in table download"
+pupRequired: true
+pupVersion: "pinblob"
+romBundled: true
+romChecksum: "06BFE09FA0B642094F36AAA7DB6FC687"
+romNotes: "Included in table download"
+tableNotes: "Download - 'Pinblob (CLV 2024) V1.0.rar', version 1.0.0"
+tableVPSId: "Ojf-8GKdt6"
+tagline: "If it had a mind, you could reason with it"
+testers:
+  - "Missile Toad
+PBW23"
+vpxChecksum: "06BFE09FA0B642094F36AAA7DB6FC687"
+vpxVPSId: "JWB3WseUaS"
