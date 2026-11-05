@@ -14,7 +14,7 @@ Dim usePUP: Dim cPuPPack: Dim PuPlayer: Dim PUPStatus: PUPStatus=false ' dont ed
 
 '*************************** PuP Settings for this table ********************************
 
-usePUP   = true            ' enable Pinup Player functions for this table
+usePUP   = false            ' enable Pinup Player functions for this table
 cPuPPack = "starfox"    ' name of the PuP-Pack / PuPVideos folder for this table
 
 '//////////////////// PINUP PLAYER: STARTUP & CONTROL SECTION //////////////////////////
