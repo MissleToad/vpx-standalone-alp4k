@@ -4,10 +4,10 @@ backglassChecksum: "815D28E7055C905D914C4DFBE88F7BA3"
 backglassNotes: "Included with the 'Last Starfighter, The (Taito, 1983) v1.01 PUP.zip' table download"
 fps: 60
 postInstallRename:
-  - source: "Last Starfighter, The (Taito, 1983) v1.01 PUP/LStarfighter"
-    destination: "Last Starfighter, The (Taito, 1983) v1.01 PUP/music/LStarfighter"
+  - source: "LStarfighter"
+    destination: "music/LStarfighter"
 pupArchiveFormat: "zip"
-pupArchiveRoot: "Last Starfighter, The (Taito, 1983) v1.01 PUP/PupVideos"
+pupArchiveRoot: "Last Starfighter, The (Taito, 1983) v1.01 PUP/PupVideos/last-starfighter"
 pupBundled: true
 pupChecksum: "2E2ACFB437C4ED577F6BCEA4A6351980"
 pupNotes: "Included with the 'Last Starfighter, The (Taito, 1983) v1.01 PUP.zip' table download"
@@ -20,5 +20,10 @@ tableVPSId: "-IQc03vLYC"
 tagline: "Greetings, Starfighter. You have been recruited by the Star League"
 testers:
   - "Missile Toad"
-vpxChecksum: "70840499430AD9D0D79F6BA584BF3A02"
+vpxArchiveFormat: "zip"
+vpxChecksum:
+  - "2E2ACFB437C4ED577F6BCEA4A6351980"
+  - "70840499430AD9D0D79F6BA584BF3A02"
+vpxExtractExtra:
+  - "Last Starfighter, The (Taito, 1983) v1.01 PUP/LStarfighter"
 vpxVPSId: "D4APGqIYk8"
