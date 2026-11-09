@@ -21,6 +21,7 @@ tableVPSId: "-IQc03vLYC"
 tagline: "Greetings, Starfighter. You have been recruited by the Star League"
 testers:
   - "Missile Toad"
+vpxArchiveFormat: "zip"
 vpxChecksum:
   - "2E2ACFB437C4ED577F6BCEA4A6351980"
   - "70840499430AD9D0D79F6BA584BF3A02"
