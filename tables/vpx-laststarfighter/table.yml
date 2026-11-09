@@ -11,6 +11,7 @@ pupArchiveRoot: "Last Starfighter, The (Taito, 1983) v1.01 PUP/PupVideos/last-st
 pupBundled: true
 pupChecksum: "2E2ACFB437C4ED577F6BCEA4A6351980"
 pupNotes: "Included with the 'Last Starfighter, The (Taito, 1983) v1.01 PUP.zip' table download"
+pupRequired: true
 pupVersion: "last-starfighter"
 romChecksum: "405DC39EB4DB6EE70A5C159D4E400092"
 romNotes: "Download - 'fireactd.zip'"
