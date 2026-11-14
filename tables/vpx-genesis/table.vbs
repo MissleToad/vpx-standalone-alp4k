@@ -965,10 +965,17 @@ End Sub
 '******************************************************
 '						TROUGH 
 '******************************************************
-Sub sw74a_Hit():Controller.Switch(74) = 1:UpdateTrough:End Sub
-Sub sw74a_UnHit():Controller.Switch(74) = 0:UpdateTrough:End Sub
-Sub sw74b_Hit():UpdateTrough:End Sub
-Sub sw74b_UnHit():UpdateTrough:End Sub
+'4kp fix (tilt): switch 74 now follows the BACK trough slot (sw74b), so it is closed only when
+'4kp fix (tilt): both balls are home. It used to follow the front slot (sw74a) and stayed closed
+'4kp fix (tilt): during single-ball play, which let the ROM end a tilted ball before it drained.
+'4kp original: Sub sw74a_Hit():Controller.Switch(74) = 1:UpdateTrough:End Sub
+'4kp original: Sub sw74a_UnHit():Controller.Switch(74) = 0:UpdateTrough:End Sub
+'4kp original: Sub sw74b_Hit():UpdateTrough:End Sub
+'4kp original: Sub sw74b_UnHit():UpdateTrough:End Sub
+Sub sw74a_Hit():UpdateTrough:End Sub	'4kp fix (tilt)
+Sub sw74a_UnHit():UpdateTrough:End Sub	'4kp fix (tilt)
+Sub sw74b_Hit():Controller.Switch(74) = 1:UpdateTrough:End Sub	'4kp fix (tilt)
+Sub sw74b_UnHit():Controller.Switch(74) = 0:UpdateTrough:End Sub	'4kp fix (tilt)
 'Sub sw74_Hit():Debug.Print("sw74_Hit"):End Sub
 'Sub sw74_UnHit():Debug.Print("sw74_UnHit"):End Sub
 Sub sw55_Hit():Controller.Switch(55) = 1 : RandomSoundDrain sw55 : UpdateTrough : End Sub
