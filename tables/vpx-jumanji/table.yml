@@ -1,0 +1,16 @@
+---
+fps: 60
+mainNotes: "Adventurers beware: Do not begin unless you intend to finish"
+pupArchiveFormat: "rar"
+pupArchiveRoot: "Jumanji 1.31/jumanji"
+pupChecksum: "5C96983E64466CF9A5EE82DBE6BAC3BF"
+pupNotes: "Download - 'Jumanji 1.3.rar', version 1.3"
+pupRequired: true
+pupVersion: "jumanji"
+pupVPSId: "exLd00tRYQ"
+tableNotes: "Download - 'Jumanji 1.4 for puppack user.vpx', version 1.4"
+tableVPSId: "wX79awhyJS"
+testers:
+  - "Missile Toad"
+vpxChecksum: "C42C12BC730420D62CA0429472CDBC7C"
+vpxVPSId: "XeZHOYORBu"
